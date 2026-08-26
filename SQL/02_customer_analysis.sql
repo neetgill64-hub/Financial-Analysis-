@@ -398,3 +398,15 @@ SELECT
 FROM `financial-data-505202.Financial_data.fact_financials_final`
 GROUP BY customer_segment
 ORDER BY variance_percent ASC;
+
+  ### calculate the cumulative revenue percentage:
+  SELECT
+    customer_segment,
+    SUM(revenue) AS total_revenue,
+    SAFE_DIVIDE(
+        SUM(revenue),
+        SUM(SUM(revenue)) OVER ()
+    ) * 100 AS revenue_contribution_percent
+FROM `financial-data-505202.Financial_data.fact_financials_final`
+GROUP BY customer_segment
+ORDER BY total_revenue DESC;
