@@ -325,11 +325,61 @@ ORDER BY
   month,
   customer_segment;
   
-### Which customer segments generate the most revenue and profit, and which segments are the most profitable?
-    customer_segment,
-    SUM(revenue) AS total_revenue,
-    SUM(profit) AS total_profit,
-    SAFE_DIVIDE(SUM(profit), SUM(revenue)) * 100 AS profit_margin_percent
-FROM `financial-data-505202.Financial_data.fact_financials_final`
-GROUP BY customer_segment
-ORDER BY total_profit DESC;
+### Which customer segments desrve more sales and marketing investment 
+WITH Segment_Performance AS (
+  SELECT
+    dc.customer_segment AS customer_segment,
+
+    SUM(f.revenue) AS total_revenue,
+
+    SUM(
+      f.revenue - f.cogs - f.operating_expense
+    ) AS total_profit,
+
+    ROUND(
+      SAFE_DIVIDE(
+        SUM(f.revenue - f.cogs - f.operating_expense),
+        SUM(f.revenue)
+      ) * 100,
+      2
+    ) AS profit_margin_percent
+
+  FROM `financial-data-505202.Financial_data.fact_financials_final` AS f
+
+  LEFT JOIN `financial-data-505202.Financial_data.dim_customer` AS dc
+    ON f.customer_key = dc.customer_key
+
+  GROUP BY
+    dc.customer_segment
+)
+
+SELECT
+  customer_segment,
+  total_revenue,
+  total_profit,
+  profit_margin_percent,
+
+  RANK() OVER (
+    ORDER BY total_profit DESC
+  ) AS profit_rank,
+
+  CASE
+    WHEN total_profit >= 5000000
+         AND profit_margin_percent >= 45
+      THEN 'Core Investment'
+
+    WHEN total_profit < 5000000
+         AND profit_margin_percent >= 48
+      THEN 'Growth Opportunity'
+
+    WHEN total_profit >= 3000000
+         AND profit_margin_percent >= 45
+      THEN 'Maintain & Optimise'
+
+    ELSE 'Review'
+END AS investment_strategy
+
+FROM Segment_Performance
+
+ORDER BY
+  profit_rank;
