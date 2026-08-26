@@ -324,3 +324,12 @@ FROM segment_change
 ORDER BY
   month,
   customer_segment;
+  
+### Which customer segments generate the most revenue and profit, and which segments are the most profitable?
+    customer_segment,
+    SUM(revenue) AS total_revenue,
+    SUM(profit) AS total_profit,
+    SAFE_DIVIDE(SUM(profit), SUM(revenue)) * 100 AS profit_margin_percent
+FROM `financial-data-505202.Financial_data.fact_financials_final`
+GROUP BY customer_segment
+ORDER BY total_profit DESC;
