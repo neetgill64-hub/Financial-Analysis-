@@ -383,3 +383,18 @@ FROM Segment_Performance
 
 ORDER BY
   profit_rank;
+  
+## Which customer segments are underperforming against budget?
+
+SELECT
+    customer_segment,
+    SUM(revenue) AS actual_revenue,
+    SUM(budget_revenue) AS budget_revenue,
+    SUM(revenue) - SUM(budget_revenue) AS budget_variance,
+    SAFE_DIVIDE(
+        SUM(revenue) - SUM(budget_revenue),
+        SUM(budget_revenue)
+    ) * 100 AS variance_percent
+FROM `financial-data-505202.Financial_data.fact_financials_final`
+GROUP BY customer_segment
+ORDER BY variance_percent ASC;
