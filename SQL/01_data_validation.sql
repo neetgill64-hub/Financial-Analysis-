@@ -81,3 +81,13 @@ LEFT JOIN `financial-data-505202.Financial_data.dim_customer` c
 LEFT JOIN `financial-data-505202.Financial_data.dim_date` dt
   ON f.date_key = dt.date_key;
 ...........................................................................................................
+  ## Check Data Types 
+SELECT
+  column_name,
+  data_type,
+  is_nullable
+FROM `financial-data-505202.Financial_data.INFORMATION_SCHEMA.COLUMNS`
+WHERE table_name = 'fact_financials_final'
+ORDER BY ordinal_position;
+
+..............................................
